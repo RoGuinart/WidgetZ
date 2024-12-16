@@ -274,8 +274,8 @@ int wz_editbox_proc(WZ_WIDGET* wgt, const ALLEGRO_EVENT* event)
 								// Make old selection smaller
 								else if(box->sel_start < box->cursor_pos)
 									box->sel_end = box->cursor_pos;
-								else
-									box->sel_start = box->cursor_pos;
+
+								box->sel_start = box->cursor_pos;
 							}
 							else
 							{
@@ -299,8 +299,8 @@ int wz_editbox_proc(WZ_WIDGET* wgt, const ALLEGRO_EVENT* event)
 									box->sel_start = box->cursor_pos - 1;
 								else if(box->sel_end > box->cursor_pos)
 									box->sel_start = box->cursor_pos;
-								else
-									box->sel_end = box->cursor_pos;
+
+								box->sel_end = box->cursor_pos;
 							}
 							else
 							{
@@ -432,6 +432,8 @@ void wz_init_editbox(WZ_EDITBOX* box, WZ_WIDGET* parent, float x, float y, float
 
 	box->cursor_pos = 0;
 	box->scroll_pos = 0;
+	box->sel_start = 0;
+	box->sel_end = 0;
 	wgt->proc = wz_editbox_proc;
 }
 
