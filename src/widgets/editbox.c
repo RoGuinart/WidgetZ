@@ -185,6 +185,22 @@ int wz_editbox_proc(WZ_WIDGET* wgt, const ALLEGRO_EVENT* event)
 
 			if((int)(event->keyboard.unichar) > 31 && (int)(event->keyboard.unichar) != 127)
 			{
+				// If some text is selected, delete it
+				if(box->sel_start < box->sel_end)
+				{
+					al_ustr_remove_range(box->text, box->sel_start, box->sel_end);
+					len = al_ustr_length(box->text);
+
+					//box->cursor_pos -= (box->sel_end - box->sel_start);
+					box->cursor_pos = box->sel_start;
+
+					if(box->cursor_pos > len)
+						box->cursor_pos = len;
+
+					box->sel_start = len;
+					box->sel_end = 0;
+				}
+
 				al_ustr_insert_chr(box->text, al_ustr_offset(box->text, box->cursor_pos), event->keyboard.unichar);
 				box->cursor_pos++;
 			}
@@ -194,6 +210,23 @@ int wz_editbox_proc(WZ_WIDGET* wgt, const ALLEGRO_EVENT* event)
 				{
 					case ALLEGRO_KEY_BACKSPACE:
 					{
+						if(box->sel_start < box->sel_end)
+						{
+							al_ustr_remove_range(box->text, box->sel_start, box->sel_end);
+							len = al_ustr_length(box->text);
+
+							//box->cursor_pos -= (box->sel_end - box->sel_start);
+							box->cursor_pos = box->sel_start;
+
+							if(box->cursor_pos > len)
+								box->cursor_pos = len;
+
+							box->sel_start = len;
+							box->sel_end = 0;
+
+							break;
+						}
+
 						if(len > 0 && box->cursor_pos > 0)
 						{
 							al_ustr_remove_chr(box->text, al_ustr_offset(box->text, box->cursor_pos - 1));
@@ -204,6 +237,23 @@ int wz_editbox_proc(WZ_WIDGET* wgt, const ALLEGRO_EVENT* event)
 					}
 					case ALLEGRO_KEY_DELETE:
 					{
+						if(box->sel_start < box->sel_end)
+						{
+							al_ustr_remove_range(box->text, box->sel_start, box->sel_end);
+							len = al_ustr_length(box->text);
+
+							//box->cursor_pos -= (box->sel_end - box->sel_start);
+							box->cursor_pos = box->sel_start;
+
+							if(box->cursor_pos > len)
+								box->cursor_pos = len;
+
+							box->sel_start = len;
+							box->sel_end = 0;
+
+							break;
+						}
+
 						if(len > 0 && box->cursor_pos < len)
 						{
 							al_ustr_remove_chr(box->text, al_ustr_offset(box->text, box->cursor_pos));
@@ -216,6 +266,22 @@ int wz_editbox_proc(WZ_WIDGET* wgt, const ALLEGRO_EVENT* event)
 						if(box->cursor_pos > 0)
 						{
 							box->cursor_pos--;
+							if(event->keyboard.modifiers && ALLEGRO_KEYMOD_SHIFT)
+							{
+								// New selection
+								if(box->sel_end == 0)
+									box->sel_end = box->cursor_pos + 1;
+								// Make old selection smaller
+								else if(box->sel_start < box->cursor_pos)
+									box->sel_end = box->cursor_pos;
+								else
+									box->sel_start = box->cursor_pos;
+							}
+							else
+							{
+								box->sel_start = len;
+								box->sel_end = 0;
+							}
 						}
 						else
 							ret = 0;
@@ -227,6 +293,20 @@ int wz_editbox_proc(WZ_WIDGET* wgt, const ALLEGRO_EVENT* event)
 						if(box->cursor_pos < len)
 						{
 							box->cursor_pos++;
+							if(event->keyboard.modifiers && ALLEGRO_KEYMOD_SHIFT)
+							{
+								if(box->sel_start == len)
+									box->sel_start = box->cursor_pos - 1;
+								else if(box->sel_end > box->cursor_pos)
+									box->sel_start = box->cursor_pos;
+								else
+									box->sel_end = box->cursor_pos;
+							}
+							else
+							{
+								box->sel_start = len;
+								box->sel_end = 0;
+							}
 						}
 						else
 							ret = 0;
@@ -235,12 +315,36 @@ int wz_editbox_proc(WZ_WIDGET* wgt, const ALLEGRO_EVENT* event)
 					}
 					case ALLEGRO_KEY_HOME:
 					{
+						if(event->keyboard.modifiers && ALLEGRO_KEYMOD_SHIFT)
+						{
+							if(box->sel_end == 0)
+								box->sel_end = box->cursor_pos;
+							box->sel_start = 0;
+						}
+						else
+						{
+							box->sel_start = len;
+							box->sel_end = 0;
+						}
 						box->cursor_pos = 0;
 						break;
 					}
 					case ALLEGRO_KEY_END:
 					{
 						len = al_ustr_length(box->text);
+
+						if(event->keyboard.modifiers && ALLEGRO_KEYMOD_SHIFT)
+						{
+							if(box->sel_start == len)
+								box->sel_start = box->cursor_pos;
+							box->sel_end = len;
+						}
+						else
+						{
+							box->sel_start = len;
+							box->sel_end = 0;
+						}
+
 						box->cursor_pos = len;
 						break;
 					}

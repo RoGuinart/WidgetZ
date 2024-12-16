@@ -338,6 +338,8 @@ typedef struct WZ_EDITBOX
 	int own;
 	int cursor_pos;
 	int scroll_pos;
+	int sel_start;
+	int sel_end;
 } WZ_EDITBOX;
 
 /*
